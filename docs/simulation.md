@@ -18,7 +18,10 @@ The decision is real, but the last third of the game is not.
 2. **Getting it wrong early is cheap; getting it wrong late is not.** Four rounds early costs
    18% of the peak. Four rounds late costs 29%, and seven rounds late costs 67%.
 3. **Under best play the last seven rounds contain no decision at all.** The board is empty by
-   round 13 and rounds 14 to 20 are 11 Electors banking 11 votes a round.
+   round 13 and rounds 14 to 20 are 11 Electors banking 11 votes a round. The cause is the
+   *rate* of retirement, not the length of the game or the timing of the first Elector:
+   nothing stops a player emptying the whole board in one round, and that is what good play
+   does. Shortening the game was measured at 12, 14 and 16 rounds and makes it worse.
 4. **Ring 1 gridlocks the game from round 3 unless you rush ring 2.** The hand-tuned AI sits
    at zero free tiles for six straight rounds. Buying ring 2 in round 6 instead of round 9
    is worth more than any other single change in these runs.
@@ -106,17 +109,70 @@ than as a worker, there is no reason to keep an economy, and once the economy is
 nothing to spend on. The curve says the crossover is round 11, so the last nine rounds are
 always going to be thin.
 
-Worth putting to the table before the dials are tuned, because it changes what is being tuned
-for. Possible answers, in rough order of how much they disturb the rest of the game:
+### Shortening the game makes it worse, not better
 
-- **Shorten the game.** At 13 or 14 rounds the curve's peak sits near the end and the dead
-  stretch disappears. Cheapest change, and it costs nothing else.
-- **Electors cost upkeep.** A seated Elector eats wheat, so you cannot strip the economy
-  entirely, and the last rounds still need managing.
+The obvious answer is to end the game before the dead stretch starts. It was the first thing
+tried and it fails. The curve at four lengths, with the peak player of each then played
+against itself to count the rounds in which nothing is bought and nobody is retired:
+
+| Game length | Peak at | How far through | Plateau | Dead rounds | Trailing dead | Board empty from |
+|---|---|---|---|---|---|---|
+| 12 | round 4 | 33% | 4-6 | 7 (58%) | 6 | round 6 |
+| 14 | round 4 | 29% | 4-6 | 9 (64%) | 8 | round 6 |
+| 16 | round 6 | 38% | 4-10 | 10 (63%) | 9 | round 7 |
+| 20 | round 10 | 50% | 9-13 | 8 (40%) | 7 | round 13 |
+
+**Of the four, the 20-round game is the one with the most to do.** Shortening moves the peak
+earlier faster than it shortens the game, so the dead tail grows as a share of play: 40% of a
+20-round game, 64% of a 14-round one.
+
+Worse, it destroys the decision. An Assembly costs 4 wheat and 4 wood, which cannot be
+afforded before about round 4. At 12 and 14 rounds the peak sits exactly on that floor, so
+the best line is "convert the moment you physically can". The interior optimum that makes the
+mechanic interesting at 20 rounds becomes a corner solution in all but name. A 14-round game
+reads: play three rounds, retire three villagers in round 4, retire the rest in round 6, then
+watch for eight rounds.
+
+### It is the rate of conversion, not the length or the timing
+
+Every peak player found, at every length, retires as fast as the rules let it. Nothing caps
+the rate: free seats limit the total, but a player with twelve seats may fill all twelve in
+one round. That is what empties the board in two rounds and creates the dead stretch.
+
+Varying only how many villagers a player may retire per round, at 20 rounds, in self-play:
+
+| Retirements allowed per round | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| Final votes | 66 | **96** | 90 | 90 | 90 | 90 |
+| Dead rounds | **1** | 6 | 9 | 9 | 9 | 9 |
+| Trailing dead rounds | **0** | 5 | 8 | 8 | 8 | 8 |
+| Board empty from | round 20 | round 15 | never empties | | | |
+
+At one a round there is almost nothing dead in the game: the board stays populated to round
+20 and only one round has no decision in it. It costs about a third of the score. At two a
+round the score is *higher* than the uncapped game (96 against 90) and the dead rounds fall
+from nine to six, because a player who keeps working while converting can afford more.
+
+That last point is the useful one: **capping the rate is not a trade-off against score, at
+least not at two a round.** Dumping the whole board at once is what good play currently does,
+and it is not even the best line in self-play; it only looks best under the
+votes-against-the-hand-tuned-AI measure the curve and evolution both optimise.
+
+A caveat on how this was measured: this varies an AI gene (`convertPerRound`), not a rule.
+A rule would bind every player equally, which is the same thing in self-play but has not been
+tested as a rule. It is 40 games on one personality, so it is a strong hint and not a settled
+result.
+
+### So the options worth putting to the table are
+
+- **Cap retirements per round**, probably at one or two per Assembly. On this evidence it is
+  the only change that addresses the actual cause, and at two a round it appears to cost
+  nothing. Needs a new rule: there is no rate limit in `rules-config.js` today.
+- **Electors cost upkeep.** A seated Elector eats wheat, so the economy cannot be stripped
+  entirely and the last rounds still need managing.
 - **Votes scale with the settlement that seated them.** An Elector banks more while the
   settlement still works tiles, so emptying the board costs you.
-- **Cap retirement per round by Assembly size.** Already half true: seats limit the total, but
-  not the rate. The peak player retires five in round 11 and five more in round 13.
+- **Not shortening the game.** Measured above, and it makes both problems worse.
 
 ## The AI personalities
 
@@ -244,9 +300,13 @@ does the peak move, and does the plateau get narrower?
    conversion harder.
 3. `--set villager.coefficient=2`. Makes population expensive, which should pull the peak
    earlier.
-4. `--set buildings.assembly.seats=2`. Caps the rate of conversion, which is the lever on the
-   round-13 cliff.
-5. `--set rounds=14`, against the dead-rounds finding above.
+4. `--set buildings.assembly.seats=2`. Caps the total number of Electors, though not the rate.
+
+Game length has already been swept at 12, 14, 16 and 20 rounds: see the dead-rounds section.
+Shortening the game is not worth pursuing further.
+
+The change the evidence actually points at is a rate cap on retirement, which needs a new rule
+rather than a dial. It is not in `rules-config.js` yet, so it cannot be swept with `--set`.
 
 Before the next breeding run, and separately from the dials: drop `convertFrom` and rename
 `assemblyFrom`, so the search budget goes on genes that change the outcome.

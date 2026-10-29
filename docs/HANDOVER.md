@@ -72,8 +72,11 @@ Full write-up in `docs/simulation.md`. The short version:
 
 ## Next steps, in order
 
-1. **Put the dead rounds to Phil.** `docs/simulation.md` lists four options, cheapest first
-   (a shorter game). This changes what the dials are being tuned for, so it comes before them.
+1. **Put the dead rounds to Phil.** The cause is measured: nothing caps how many villagers may
+   be retired in one round, so good play empties the board in two. Capping it at two a round
+   scores *higher* than the uncapped game (96 against 90) and cuts dead rounds from nine to
+   six. Shortening the game was swept at 12, 14 and 16 rounds and makes it worse. See
+   `docs/simulation.md`. This changes what the dials are tuned for, so it comes before them.
 2. **Dial experiments**, one change at a time, with the conversion curve after each. Does the
    peak move, and does the plateau narrow?
    `--set ringUpgrades.2.wheat=6 --set ringUpgrades.2.wood=6`, then
