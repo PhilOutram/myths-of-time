@@ -1,0 +1,13 @@
+{
+  "name": "Myths of Time",
+  "short_name": "Myths",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#17120c",
+  "theme_color": "#17120c",
+  "icons": [
+    { "src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

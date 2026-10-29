@@ -1,0 +1,10 @@
+{
+  "name": "myths-of-time",
+  "private": true,
+  "type": "module",
+  "description": "Myths of Time: playable digital version, game engine and balance simulator",
+  "scripts": {
+    "test": "node --test",
+    "sim": "node sim.js"
+  }
+}

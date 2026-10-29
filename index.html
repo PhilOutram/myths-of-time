@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#17120c" />
+  <meta name="description" content="Myths of Time - grow a settlement, then turn its people into votes" />
+  <title>Myths of Time</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="favicon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" />
+  <link rel="stylesheet" href="styles.css?v=0.1" />
+</head>
+<body>
+  <section id="splash" class="splash" aria-label="Myths of Time">
+    <div class="splash-card">
+      <img class="splash-icon" src="icon.png" alt="" />
+      <h1 class="title">Myths of Time</h1>
+      <p class="tagline">Grow a settlement. Then give it away, one villager at a time, to win the vote.</p>
+      <nav class="menu" aria-label="Main menu">
+        <button id="menu-play" class="btn" type="button">Play</button>
+        <button id="menu-resume" class="btn" type="button" hidden>Resume</button>
+        <button id="menu-rules" class="btn btn-quiet" type="button">How to play</button>
+      </nav>
+      <p id="version" class="version"></p>
+    </div>
+  </section>
+
+  <div id="setup" class="overlay" hidden>
+    <form id="setup-form" class="card" aria-labelledby="setup-title">
+      <h2 id="setup-title">New game</h2>
+      <label class="field">Opponents
+        <select id="setup-opponents">
+          <option value="1">One AI empire</option>
+          <option value="2">Two AI empires</option>
+        </select>
+      </label>
+      <label class="field">AI
+        <select id="setup-ai">
+          <option value="evolved">Champion (bred by the simulator)</option>
+          <option value="default">Steward (hand-tuned)</option>
+        </select>
+      </label>
+      <label class="field">Map number
+        <input id="setup-map" type="number" min="1" step="1" inputmode="numeric" />
+      </label>
+      <div class="row">
+        <button id="setup-cancel" class="btn btn-quiet" type="button">Back</button>
+        <button class="btn" type="submit">Start</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="rules" class="overlay" hidden>
+    <div class="card card-wide" role="dialog" aria-labelledby="rules-title">
+      <h2 id="rules-title">How to play</h2>
+      <div id="rules-body" class="rules-body"></div>
+      <div class="row"><button id="rules-close" class="btn" type="button">Close</button></div>
+    </div>
+  </div>
+
+  <main id="game" class="game" hidden>
+    <header class="bar">
+      <button id="game-home" class="icon-btn" type="button" aria-label="Main menu">
+        <img src="favicon.png" alt="" />
+      </button>
+      <div class="bar-round"><span id="bar-round"></span><span id="bar-turn" class="muted"></span></div>
+      <div class="bar-stock" id="bar-stock"></div>
+      <div class="bar-actions">
+        <button id="undo" class="btn btn-small btn-quiet" type="button">Undo</button>
+        <button id="end-turn" class="btn btn-small" type="button">End turn</button>
+      </div>
+    </header>
+    <div class="board-wrap">
+      <svg id="board" class="board" xmlns="http://www.w3.org/2000/svg"
+        aria-label="Game board"><g id="board-root"></g></svg>
+    </div>
+    <section class="panel" aria-live="polite">
+      <p id="message" class="message"></p>
+      <div id="tile-panel"></div>
+      <div id="town-panel"></div>
+      <div id="scores"></div>
+      <ol id="log" class="log"></ol>
+    </section>
+    <div id="game-over" class="overlay" hidden>
+      <div class="card">
+        <h2 id="game-over-title"></h2>
+        <div id="game-over-body"></div>
+        <div class="row">
+          <button id="game-over-menu" class="btn btn-quiet" type="button">Main menu</button>
+          <button id="game-over-again" class="btn" type="button">Play again</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="confirm-dialog" class="overlay" hidden>
+    <div class="card" role="alertdialog" aria-labelledby="confirm-title"
+      aria-describedby="confirm-text">
+      <h2 id="confirm-title"></h2>
+      <p id="confirm-text"></p>
+      <div class="row">
+        <button id="confirm-no" class="btn btn-quiet" type="button"></button>
+        <button id="confirm-yes" class="btn" type="button"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=0.1" type="module"></script>
+</body>
+</html>
