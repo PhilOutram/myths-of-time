@@ -9,11 +9,11 @@
 // The first player rotates between games so no seat always starts.
 import { writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
-import { RULES } from "./rules-config.js?v=0.1";
-import { buildMap } from "./maps.js?v=0.1";
-import { newGame } from "./engine.js?v=0.1";
-import { planTurn, DEFAULT_PERSONALITY } from "./ai.js?v=0.1";
-import { EVOLVED } from "./ai-personalities.js?v=0.1";
+import { RULES } from "./rules-config.js";
+import { buildMap } from "./maps.js";
+import { newGame } from "./engine.js";
+import { planTurn, DEFAULT_PERSONALITY } from "./ai.js";
+import { EVOLVED } from "./ai-personalities.js";
 
 const PURCHASES = ["recruit", "build", "upgrade"];
 
@@ -203,7 +203,7 @@ function parseArgs(argv) {
   return args;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const args = parseArgs(process.argv.slice(2));
   const rules = withOverrides(RULES, args.set);
   const g = args.ai === "evolved" && EVOLVED.length ? EVOLVED[0] : DEFAULT_PERSONALITY;

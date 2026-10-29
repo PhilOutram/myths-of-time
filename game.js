@@ -1,14 +1,16 @@
 // Game screen: shows the state, turns taps into engine actions and plays the AI seats.
 // No rules here: what is allowed, and why not, always comes from the engine.
-import { RULES } from "./rules-config.js?v=0.1";
-import { buildMap } from "./maps.js?v=0.1";
+import { RULES } from "./rules-config.js";
+import { buildMap } from "./maps.js";
 import {
   newGame, applyAction, validate, canUndo, undo, income, sphere, terrainOf, villagerCost,
-  ringCost, freeSeats, seats, storageCap, villagerCount, freeTiles, inSphere,
-} from "./engine.js?v=0.1";
-import { planTurn, DEFAULT_PERSONALITY } from "./ai.js?v=0.1";
-import { EVOLVED } from "./ai-personalities.js?v=0.1";
-import { drawBoard, hexFromEvent, SEATS, RESOURCE_ICONS } from "./board.js?v=0.1";
+  ringCost, freeSeats, seats, storageCap, villagerCount, freeTiles, inSphere, STATE_FORMAT,
+} from "./engine.js";
+import { VERSION } from "./version.js";
+import { planTurn, DEFAULT_PERSONALITY } from "./ai.js";
+import { EVOLVED } from "./ai-personalities.js";
+import { drawBoard, hexFromEvent, SEATS, RESOURCE_ICONS } from "./board.js";
+import { createPanZoom } from "./pan-zoom.js";
 
 const SAVE_KEY = "myths-of-time.game";
 const AI_STEP_MS = 260;
@@ -26,13 +28,28 @@ let onExit = () => {};
 // ---------------------------------------------------------------------------------------
 // Saving
 
-export function hasSavedGame() {
+// A save written by an older build may not fit the engine running now. The state carries
+// the format it was written with, so anything else is dropped rather than resumed into a
+// game that plays by half-changed rules or throws on the first tap. Bump STATE_FORMAT in
+// engine.js whenever the shape of the state changes.
+function readSave() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
-    return Boolean(raw && !JSON.parse(raw).state.result);
+    if (!raw) return null;
+    const saved = JSON.parse(raw);
+    if (saved?.state?.format !== STATE_FORMAT) {
+      localStorage.removeItem(SAVE_KEY);
+      return null;
+    }
+    return saved;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export function hasSavedGame() {
+  const saved = readSave();
+  return Boolean(saved && !saved.state.result);
 }
 
 function save() {
@@ -43,22 +60,13 @@ function save() {
   }
 }
 
-function load() {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
 // ---------------------------------------------------------------------------------------
 // Starting
 
 export function openGame({ resume = false, settings = null, exit = () => {} }) {
   onExit = exit;
   if (resume) {
-    game = load();
+    game = readSave();
     if (!game) return false;
   } else {
     game = startGame(settings);
@@ -70,6 +78,9 @@ export function openGame({ resume = false, settings = null, exit = () => {} }) {
   $("game-over").hidden = true;
   wire();
   render();
+  // After the first render, because the board's viewBox is set as the terrain is built.
+  boardView.reset(game.state.map);
+  boardView.focusHex(game.state.players[game.seat].settlement);
   if (game.state.result) showGameOver();
   else continueAI();
   return true;
@@ -84,15 +95,24 @@ function startGame({ opponents = 1, ai = "evolved", mapNumber = 1 }) {
     personalities.push(pool[(i - 1) % pool.length]);
   }
   const state = newGame({ rules: RULES, map: buildMap(mapNumber, players.length), players });
-  const g = { state, seat: 0, personalities, log: [], settings: { opponents, ai, mapNumber } };
+  const g = { version: VERSION, state, seat: 0, personalities, log: [],
+    settings: { opponents, ai, mapNumber } };
   g.log.unshift(`Map ${mapNumber}. Round 1 of ${RULES.rounds}: you start with ${resText(state.players[0].resources)}.`);
   return g;
 }
 
 let wired = false;
+let boardView = null; // pan and zoom for the board
+
 function wire() {
   if (wired) return;
   wired = true;
+  // Made before the board's own click handler, so that when a tap on the background is the
+  // event target a finished drag is still swallowed before the board reads it as a tap.
+  boardView = createPanZoom($("board"), $("board-root"));
+  $("zoom-in").addEventListener("click", () => boardView.zoomIn());
+  $("zoom-out").addEventListener("click", () => boardView.zoomOut());
+  $("zoom-fit").addEventListener("click", () => boardView.fit());
   $("board").addEventListener("click", (e) => {
     if (busy || !game) return;
     const k = hexFromEvent(e);

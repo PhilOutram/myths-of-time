@@ -2,7 +2,7 @@
 // Settlements sit 6 hexes apart so their ring-3 spheres share one edge of 4 contested tiles
 // (the paper test's "two spheres side by side, sharing one edge"). Every settlement gets the
 // same terrain, rotated or mirrored, so no seat has a better start.
-import { key, parseKey, disc, ring, rotate, distance } from "./hex.js?v=0.1";
+import { key, parseKey, disc, ring, rotate, distance } from "./hex.js";
 
 // Settlement centres for 2 and 3 players, and the symmetry that carries seat 0's land to the
 // other seats. 2 players: a point reflection through the midpoint. 3 players: a 120 degree

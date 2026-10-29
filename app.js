@@ -1,7 +1,7 @@
 // Myths of Time - splash menu, new-game setup and the rules page.
-import { VERSION } from "./version.js?v=0.1";
-import { openGame, hasSavedGame } from "./game.js?v=0.1";
-import { confirmDialog } from "./dialog.js?v=0.1";
+import { VERSION } from "./version.js";
+import { openGame, hasSavedGame } from "./game.js";
+import { confirmDialog } from "./dialog.js";
 
 // Service worker: installable and offline. The relative path works on the Pages subpath.
 if ("serviceWorker" in navigator) {

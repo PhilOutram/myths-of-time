@@ -4,7 +4,7 @@
 import {
   applyAction, canAfford, villagerCost, ringCost, freeTiles, terrainOf, income,
   villagerTiles, freeSeats, storageCap, canAct, tileProblem,
-} from "./engine.js?v=0.1";
+} from "./engine.js";
 
 export const DEFAULT_PERSONALITY = {
   name: "Steward",

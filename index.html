@@ -13,7 +13,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=0.1" />
+  <link rel="stylesheet" href="styles.css?v=0.2" />
+  <!-- One place to version the modules. Each module imports its neighbours by plain name
+       ("./engine.js") and this map sends that to the versioned URL, so a publish changes
+       this block instead of every import line in every file. The browser still fetches
+       "engine.js?v=0.2", so the service worker's cache keys are unchanged, and Node ignores
+       the map and reads the files straight off disk, so the simulator is unaffected. -->
+  <script type="importmap">
+  {
+    "imports": {
+      "./ai.js": "./ai.js?v=0.2",
+      "./ai-personalities.js": "./ai-personalities.js?v=0.2",
+      "./board.js": "./board.js?v=0.2",
+      "./dialog.js": "./dialog.js?v=0.2",
+      "./engine.js": "./engine.js?v=0.2",
+      "./game.js": "./game.js?v=0.2",
+      "./hex.js": "./hex.js?v=0.2",
+      "./maps.js": "./maps.js?v=0.2",
+      "./pan-zoom.js": "./pan-zoom.js?v=0.2",
+      "./rules-config.js": "./rules-config.js?v=0.2",
+      "./version.js": "./version.js?v=0.2"
+    }
+  }
+  </script>
 </head>
 <body>
   <section id="splash" class="splash" aria-label="Myths of Time">
@@ -78,6 +100,12 @@
     <div class="board-wrap">
       <svg id="board" class="board" xmlns="http://www.w3.org/2000/svg"
         aria-label="Game board"><g id="board-root"></g></svg>
+      <div class="board-zoom">
+        <button id="zoom-in" class="zoom-btn" type="button" aria-label="Zoom in">+</button>
+        <button id="zoom-fit" class="zoom-btn" type="button"
+          aria-label="Show the whole board">Fit</button>
+        <button id="zoom-out" class="zoom-btn" type="button" aria-label="Zoom out">&minus;</button>
+      </div>
     </div>
     <section class="panel" aria-live="polite">
       <p id="message" class="message"></p>
@@ -110,6 +138,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=0.1" type="module"></script>
+  <script src="app.js?v=0.2" type="module"></script>
 </body>
 </html>

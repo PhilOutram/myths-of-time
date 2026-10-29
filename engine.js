@@ -5,7 +5,7 @@
 // A round: every player collects from their worked tiles, then players act (in turn, or all
 // at once in "concurrent" mode), then at the end of the round storage limits apply and every
 // Elector banks its votes. After the last round the most votes wins.
-import { key, parseKey, disc, distance } from "./hex.js?v=0.1";
+import { key, parseKey, disc, distance } from "./hex.js";
 
 export const STATE_FORMAT = 1;
 

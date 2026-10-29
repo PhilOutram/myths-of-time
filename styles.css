@@ -224,16 +224,25 @@ h3 {
   height: 100dvh;
 }
 
+/* One row on wide screens. On a phone the stock drops to a row of its own: three figures
+   plus Undo and End turn need about 460px on one line, and more once stone and iron land. */
 .bar {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  grid-template-areas: "home round stock actions";
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.35rem 0.6rem;
   padding: max(0.5rem, env(safe-area-inset-top)) 0.6rem 0.5rem;
   background-color: var(--panel);
   border-bottom: 1px solid var(--edge);
 }
 
+.bar > .icon-btn {
+  grid-area: home;
+}
+
 .bar-round {
+  grid-area: round;
   display: grid;
   line-height: 1.15;
   font-family: var(--title-font);
@@ -247,9 +256,10 @@ h3 {
 }
 
 .bar-stock {
+  grid-area: stock;
   display: flex;
-  gap: 0.7rem;
-  flex: 1;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.7rem;
   min-width: 0;
   font-variant-numeric: tabular-nums;
 }
@@ -274,7 +284,9 @@ h3 {
 }
 
 .bar-actions {
+  grid-area: actions;
   display: flex;
+  justify-content: flex-end;
   gap: 0.4rem;
 }
 
@@ -286,16 +298,43 @@ h3 {
     radial-gradient(ellipse at center, #2a2015 0%, var(--bg) 75%);
 }
 
+/* touch-action: none, because pan-zoom.js handles dragging and pinching itself. */
 .board {
   display: block;
   width: 100%;
   height: 100%;
-  touch-action: manipulation;
+  touch-action: none;
   user-select: none;
 }
 
 .board .hex {
   cursor: pointer;
+}
+
+.board-zoom {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.zoom-btn {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  background-color: rgba(35, 27, 18, 0.85);
+  color: var(--text);
+  font-family: var(--title-font);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.zoom-btn:hover {
+  border-color: var(--accent);
 }
 
 .panel {
@@ -456,13 +495,23 @@ h3 {
   }
 }
 
-@media (max-width: 420px) {
-  .bar-round {
-    min-width: 4.4rem;
+/* Narrow: the stock takes a row of its own under the round and the buttons. */
+@media (max-width: 560px) {
+  .bar {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "home round actions"
+      "stock stock stock";
   }
 
+  .bar-round {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 420px) {
   .bar-stock {
-    gap: 0.45rem;
+    gap: 0.2rem 0.55rem;
     font-size: 0.85rem;
   }
 

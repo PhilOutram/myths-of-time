@@ -1,10 +1,10 @@
 // Offline-first service worker (same pattern as Mech Attack).
 // Bump CACHE on every publish and keep ASSETS in sync with what the app needs offline.
-const CACHE = "myths-of-time-v0.1";
-const V = "?v=0.1";
+const CACHE = "myths-of-time-v0.2";
+const V = "?v=0.2";
 const MODULES = [
-  "app.js", "version.js", "game.js", "dialog.js", "board.js", "engine.js", "ai.js",
-  "ai-personalities.js", "hex.js", "maps.js", "rules-config.js",
+  "app.js", "version.js", "game.js", "dialog.js", "board.js", "pan-zoom.js", "engine.js",
+  "ai.js", "ai-personalities.js", "hex.js", "maps.js", "rules-config.js",
 ];
 const TILES = ["farmland", "forest", "stone", "mountain", "desert"];
 const COLOURS = ["blue", "red", "yellow", "teal"];

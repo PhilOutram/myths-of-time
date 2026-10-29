@@ -32,9 +32,9 @@ The design documents live in the Claude Project "Myths of Time - AI Board Game" 
 
 ## Every publish
 1. Bump `VERSION` in `version.js` and prepend a `CHANGELOG` entry (newest first, YYYY-MM-DD).
-2. Update every `?v=` number to match: `<link>` and `<script>` in `index.html`, the `import` lines in each JS module, and `V` in `sw.js`.
+2. Update every `?v=` number to match: the `<link>`, the `<script src>` and the import map in `index.html`, and `V` in `sw.js`. Modules import each other by plain name (`./engine.js`), so no `import` line ever changes.
 3. Update `CACHE` in `sw.js`.
-4. Add every new file the app needs offline to `ASSETS` in `sw.js`.
+4. Add every new module to the import map in `index.html` and to `MODULES` in `sw.js`; add every other new file the app needs offline to `ASSETS` in `sw.js`.
 
 ## Architecture
 Rules are written once and shared by the game, the AI and the simulator:

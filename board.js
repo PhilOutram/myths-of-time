@@ -1,7 +1,7 @@
 // Draws the board as SVG from the game state plus what the UI wants highlighted.
 // No rules here: everything shown comes from the engine.
-import { parseKey, toPixel } from "./hex.js?v=0.1";
-import { sphere, terrainOf } from "./engine.js?v=0.1";
+import { parseKey, toPixel } from "./hex.js";
+import { sphere, terrainOf } from "./engine.js";
 
 export const HEX_SIZE = 50;
 const HEX_HEIGHT = Math.sqrt(3) * HEX_SIZE;
@@ -69,13 +69,58 @@ function el(name, attrs = {}, parent = null) {
   return node;
 }
 
-// Draws the whole board into the <g> root.
+// ---------------------------------------------------------------------------------------
+// Layers
+//
+// Terrain and the hex outlines never change while a map is in play, so they are built once
+// and kept. Only the layers above them are redrawn when the state changes. That keeps a
+// redraw cheap enough to sit beside a pan or a zoom, and it lets the view transform that
+// pan-zoom.js puts on the root survive a redraw.
+
+const SETTLEMENT_FILL = "#cdb88a";
+const HEX_STROKE      = "#3a2c1a";
+const WILD_SHADE      = "rgba(10,7,4,0.6)";
+const NEXT_RING_SHADE = "rgba(10,7,4,0.35)";
+const CONTESTED_LINE  = "#f1e6cf";
+const MOVING_LAYERS   = ["shades", "borders", "pieces", "marks"];
+
+let layers = null;
+
+function buildLayers(svg, root, state) {
+  root.replaceChildren();
+  const made = { root, mapId: state.map.id, terrain: el("g", {}, root) };
+  for (const name of MOVING_LAYERS) made[name] = el("g", { "pointer-events": "none" }, root);
+  const b = boardBounds(state.map);
+  svg.setAttribute("viewBox", `${b.x} ${b.y} ${b.width} ${b.height}`);
+  for (const k of Object.keys(state.map.hexes)) {
+    const terrain = terrainOf(state, k);
+    const [x, y] = hexCentre(k);
+    const g = el("g", { class: "hex", "data-k": k }, made.terrain);
+    if (terrain === "settlement") {
+      el("polygon", { points: points(corners(k)), fill: SETTLEMENT_FILL }, g);
+    } else {
+      el("image", {
+        href: `art/tiles/${terrain}.png`,
+        x: x - HEX_SIZE, y: y - HEX_HEIGHT / 2, width: 2 * HEX_SIZE, height: HEX_HEIGHT,
+        preserveAspectRatio: "none",
+      }, g);
+    }
+    el("polygon", { points: points(corners(k)), fill: "transparent",
+      stroke: HEX_STROKE, "stroke-width": 2 }, g);
+    el("title", {}, g).textContent = state.rules.terrain[terrain]?.name ?? terrain;
+  }
+  return made;
+}
+
+// Draws everything that moves, over the terrain built by buildLayers.
 // view: { seat (the human), selected (tile key), targets (Set of keys), recent (Set of keys) }
 export function drawBoard(svg, root, state, view = {}) {
   const { map } = state;
-  const b = boardBounds(map);
-  svg.setAttribute("viewBox", `${b.x} ${b.y} ${b.width} ${b.height}`);
-  root.replaceChildren();
+  if (!layers || layers.root !== root || layers.mapId !== map.id) {
+    layers = buildLayers(svg, root, state);
+  }
+  const { shades, borders, pieces, marks } = layers;
+  for (const name of MOVING_LAYERS) layers[name].replaceChildren();
 
   const spheres = state.players.map((_, p) => new Set(sphere(state, p)));
   const inAny = (k) => spheres.some((s) => s.has(k));
@@ -89,37 +134,15 @@ export function drawBoard(svg, root, state, view = {}) {
     for (const k of sphere(grown, seat)) if (!spheres[seat].has(k)) nextRing.add(k);
   }
 
-  const tiles = el("g", {}, root);
-  const shades = el("g", { "pointer-events": "none" }, root);
-  const borders = el("g", { "pointer-events": "none" }, root);
-  const pieces = el("g", { "pointer-events": "none" }, root);
-  const marks = el("g", { "pointer-events": "none" }, root);
-
   for (const k of Object.keys(map.hexes)) {
-    const terrain = terrainOf(state, k);
-    const [x, y] = hexCentre(k);
-    const g = el("g", { class: "hex", "data-k": k }, tiles);
-    if (terrain === "settlement") {
-      el("polygon", { points: points(corners(k)), fill: "#cdb88a" }, g);
-    } else {
-      el("image", {
-        href: `art/tiles/${terrain}.png`,
-        x: x - HEX_SIZE, y: y - HEX_HEIGHT / 2, width: 2 * HEX_SIZE, height: HEX_HEIGHT,
-        preserveAspectRatio: "none",
-      }, g);
-    }
-    el("polygon", { points: points(corners(k)), fill: "transparent",
-      stroke: "#3a2c1a", "stroke-width": 2 }, g);
-    const title = el("title", {}, g);
-    title.textContent = state.rules.terrain[terrain]?.name ?? terrain;
-
-    if (!inAny(k) && terrain !== "settlement") {
+    if (terrainOf(state, k) === "settlement") continue;
+    if (!inAny(k)) {
       el("polygon", { points: points(corners(k)),
-        fill: nextRing.has(k) ? "rgba(10,7,4,0.35)" : "rgba(10,7,4,0.6)" }, shades);
+        fill: nextRing.has(k) ? NEXT_RING_SHADE : WILD_SHADE }, shades);
     }
     const owners = spheres.map((s, p) => (s.has(k) ? p : -1)).filter((p) => p >= 0);
     if (owners.length > 1) {
-      el("polygon", { points: points(corners(k, 0.8)), fill: "none", stroke: "#f1e6cf",
+      el("polygon", { points: points(corners(k, 0.8)), fill: "none", stroke: CONTESTED_LINE,
         "stroke-width": 2, "stroke-dasharray": "5 5", opacity: 0.8 }, shades);
     }
   }
